@@ -7,24 +7,40 @@ Concrete IO class for a specific dataset
 
 from local_code.base_class.dataset import dataset
 
-
 class Dataset_Loader(dataset):
     data = None
     dataset_source_folder_path = None
-    dataset_source_file_name = None
-    
+
     def __init__(self, dName=None, dDescription=None):
         super().__init__(dName, dDescription)
-    
+
     def load(self):
         print('loading data...')
-        X = []
-        y = []
-        f = open(self.dataset_source_folder_path + self.dataset_source_file_name, 'r')
-        for line in f:
-            line = line.strip('\n')
-            elements = [int(i) for i in line.split(' ')]
-            X.append(elements[:-1])
-            y.append(elements[-1])
-        f.close()
-        return {'X': X, 'y': y}
+
+        def read_csv(file_path):
+            X, y = [], []
+            with open(file_path, 'r') as f:
+                for line in f:
+                    elements = line.strip().split(',')
+
+                    # first element = label
+                    label = int(elements[0])
+
+                    # remaining 784 = features
+                    features = [int(i) for i in elements[1:]]
+
+                    y.append(label)
+                    X.append(features)
+
+            return X, y
+
+        train_path = self.dataset_source_folder_path + 'train.csv'
+        test_path = self.dataset_source_folder_path + 'test.csv'
+
+        X_train, y_train = read_csv(train_path)
+        X_test, y_test = read_csv(test_path)
+
+        return {
+            'train': {'X': X_train, 'y': y_train},
+            'test': {'X': X_test, 'y': y_test}
+        }

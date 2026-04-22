@@ -16,19 +16,27 @@ class Setting_KFold_CV(setting):
         
         # load dataset
         loaded_data = self.dataset.load()
-        
+
+        X_train = np.array(loaded_data['train']['X'])
+        y_train = np.array(loaded_data['train']['y'])
+
+        X_test = np.array(loaded_data['test']['X'])
+        y_test = np.array(loaded_data['test']['y'])
+
         kf = KFold(n_splits=self.fold, shuffle=True)
-        
+
         fold_count = 0
-        score_list = []
-        for train_index, test_index in kf.split(loaded_data['X']):
+        #score_list = []
+        metric_lists = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
+
+        for train_index, test_index in kf.split(X_train):
             fold_count += 1
             print('************ Fold:', fold_count, '************')
-            X_train, X_test = np.array(loaded_data['X'])[train_index], np.array(loaded_data['X'])[test_index]
-            y_train, y_test = np.array(loaded_data['y'])[train_index], np.array(loaded_data['y'])[test_index]
+            X_tr, X_tes = X_train[train_index], X_train[test_index]
+            y_tr, y_tes = y_train[train_index], y_train[test_index]
         
             # run MethodModule
-            self.method.data = {'train': {'X': X_train, 'y': y_train}, 'test': {'X': X_test, 'y': y_test}}
+            self.method.data = {'train': {'X': X_tr, 'y': y_tr}, 'test': {'X': X_tes, 'y': y_tes}}
             learned_result = self.method.run()
             
             # save raw ResultModule
@@ -37,8 +45,23 @@ class Setting_KFold_CV(setting):
             self.result.save()
             
             self.evaluate.data = learned_result
-            score_list.append(self.evaluate.evaluate())
+            metrics = self.evaluate.evaluate()
+            if not isinstance(metrics, dict):
+                score = float(metrics)
+                metrics = {
+                    'accuracy': score,
+                    'precision': score,
+                    'recall': score,
+                    'f1': score,
+                }
+            for metric_name in metric_lists:
+                metric_lists[metric_name].append(metrics[metric_name])
+
+        mean_metrics = {metric_name: np.mean(values) for metric_name, values in metric_lists.items()}
+        std_metrics = {metric_name: np.std(values) for metric_name, values in metric_lists.items()}
+
+        #score_list.append(self.evaluate.evaluate())
         
-        return np.mean(score_list), np.std(score_list)
+        return mean_metrics, std_metrics
 
         

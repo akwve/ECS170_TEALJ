@@ -7,7 +7,7 @@ Concrete ResultModule class for a specific experiment ResultModule output
 
 from local_code.base_class.result import result
 import pickle
-
+import os
 
 class Result_Loader(result):
     data = None
@@ -17,6 +17,8 @@ class Result_Loader(result):
     
     def load(self):
         print('loading results...')
-        f = open(self.result_destination_folder_path + self.result_destination_file_name + '_' + str(self.fold_count), 'rb')
+        file_path = os.path.join(self.result_destination_folder_path,
+                                 self.result_destination_file_name + '_' + str(self.fold_count))
+        f = open(file_path, 'rb')
         self.data = pickle.load(f)
         f.close()

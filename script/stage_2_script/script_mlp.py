@@ -24,7 +24,7 @@ if __name__ == '__main__':
     result_obj.result_destination_folder_path = '../../result/stage_2_result/MLP_'
     result_obj.result_destination_file_name = 'prediction_result'
 
-    setting_obj = Setting_Train_Test_Split('k fold cross validation', '')
+    setting_obj = Setting_Train_Test_Split('train test split', '')
     #setting_obj = Setting_Tra
     # in_Test_Split('train test split', '')
 

@@ -1,7 +1,7 @@
 from local_code.stage_2_code.Dataset_Loader import Dataset_Loader
 from local_code.stage_2_code.Method_MLP import Method_MLP
 from local_code.stage_2_code.Result_Saver import Result_Saver
-from local_code.stage_2_code.Setting_Train_Test_Split import Setting_Train_Test_Split
+from local_code.stage_2_code.Setting_Train_Test import Setting_Train_Test
 from local_code.stage_2_code.Evaluate_Metrics import Evaluate_Accuracy
 import numpy as np
 import torch
@@ -21,12 +21,10 @@ if __name__ == '__main__':
     method_obj = Method_MLP('multi-layer perceptron', '')
 
     result_obj = Result_Saver('saver', '')
-    result_obj.result_destination_folder_path = '../../result/stage_2_result/MLP_'
-    result_obj.result_destination_file_name = 'prediction_result'
+    result_obj.result_destination_folder_path = '../../result/stage_2_result/'
+    result_obj.result_destination_file_name = 'MLP_prediction_result'
 
-    setting_obj = Setting_Train_Test_Split('train test split', '')
-    #setting_obj = Setting_Tra
-    # in_Test_Split('train test split', '')
+    setting_obj = Setting_Train_Test('train test', '')
 
     evaluate_obj = Evaluate_Accuracy('accuracy', '')
     # ------------------------------------------------------

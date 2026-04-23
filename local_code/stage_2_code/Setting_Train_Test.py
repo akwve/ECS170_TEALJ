@@ -9,7 +9,7 @@ from local_code.base_class.setting import setting
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-class Setting_Train_Test_Split(setting):
+class Setting_Train_Test(setting):
     fold = 3
     
     def load_run_save_evaluate(self):
@@ -17,7 +17,11 @@ class Setting_Train_Test_Split(setting):
         # load dataset
         loaded_data = self.dataset.load()
 
-        X_train, X_test, y_train, y_test = train_test_split(loaded_data['X'], loaded_data['y'], test_size = 0.33)
+        X_train = loaded_data['train']['X']
+        y_train = loaded_data['train']['y']
+
+        X_test = loaded_data['test']['X']
+        y_test = loaded_data['test']['y']
 
         # run MethodModule
         self.method.data = {'train': {'X': X_train, 'y': y_train}, 'test': {'X': X_test, 'y': y_test}}

@@ -6,6 +6,7 @@ Concrete SettingModule class for a specific experimental SettingModule
 # License: TBD
 
 from local_code.base_class.setting import setting
+from local_code.stage_2_code.Training_Convergence_Plot import save_training_loss_curve
 from sklearn.model_selection import KFold
 import numpy as np
 
@@ -27,6 +28,7 @@ class Setting_KFold_CV(setting):
 
         fold_count = 0
         #score_list = []
+        fold_loss_histories = []
         metric_lists = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
 
         for train_index, test_index in kf.split(X_train):
@@ -56,6 +58,17 @@ class Setting_KFold_CV(setting):
                 }
             for metric_name in metric_lists:
                 metric_lists[metric_name].append(metrics[metric_name])
+
+            if hasattr(self.method, 'training_loss_history') and self.method.training_loss_history:
+                fold_loss_histories.append(list(self.method.training_loss_history))
+
+        plot_file_path = self.result.result_destination_folder_path + '/training_loss_curve.png'
+        save_training_loss_curve(
+            fold_loss_histories,
+            plot_file_path,
+            'MLP Training Loss Convergence',
+            line_color='tab:blue'
+        )
 
         mean_metrics = {metric_name: np.mean(values) for metric_name, values in metric_lists.items()}
         std_metrics = {metric_name: np.std(values) for metric_name, values in metric_lists.items()}

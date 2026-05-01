@@ -54,7 +54,7 @@ if 1:
     }
     result_obj.save()
 
-    print({metrics})
+    print([metrics])
 
     print('************ Finish ************')
     # ------------------------------------------------------

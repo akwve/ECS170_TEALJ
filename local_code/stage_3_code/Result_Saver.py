@@ -19,7 +19,7 @@ class Result_Saver(result):
         print('saving results...')
         os.makedirs(self.result_destination_folder_path, exist_ok=True)
 
-        file_path = os.path.join(self.result_destination_folder_path, file_name)
+        file_path = os.path.join(self.result_destination_folder_path, self.result_destination_file_name)
         f = open(file_path, 'wb')
         pickle.dump(self.data, f)
         f.close()

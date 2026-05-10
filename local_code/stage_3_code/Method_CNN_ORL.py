@@ -15,7 +15,7 @@ import numpy as np
 class CNN_ORL(method, nn.Module):
     data = None
     # it defines the max rounds to train the model
-    max_epoch = 100
+    max_epoch = 200
     # it defines the learning rate for gradient descent based optimizer for model learning
     learning_rate = 1e-3
     batch_size = 32
@@ -25,6 +25,7 @@ class CNN_ORL(method, nn.Module):
     num_filters_2 = 64
     kernel_size = 5
     pool_size = 2
+    padding_size = 1
 
     # it defines the model architecture, e.g.,
     # how many layers, size of variables in each layer, activation function, etc.
@@ -49,11 +50,11 @@ class CNN_ORL(method, nn.Module):
         # After conv2: 64x50x40
         # After pool2: 64x25x20
 
-        self.conv_layer_1 = nn.Conv2d(1, self.num_filters_1, kernel_size=self.kernel_size)
+        self.conv_layer_1 = nn.Conv2d(1, self.num_filters_1, kernel_size=self.kernel_size, padding=self.padding_size//2)
         self.activation_1 = nn.ReLU()
         self.pool_1 = nn.MaxPool2d(kernel_size=self.pool_size)
 
-        self.conv_layer_2 = nn.Conv2d(self.num_filters_1, self.num_filters_2, kernel_size=self.kernel_size)
+        self.conv_layer_2 = nn.Conv2d(self.num_filters_1, self.num_filters_2, kernel_size=self.kernel_size, padding=self.padding_size//2)
         self.activation_2 = nn.ReLU()
         self.pool_2 = nn.MaxPool2d(kernel_size=self.pool_size)
 

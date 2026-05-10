@@ -10,7 +10,7 @@ if 1:
     #---- parameter section -------------------------------
     np.random.seed(2)
     torch.manual_seed(2)
-    config = {'max_epoch': 50, 'learning_rate': 1e-3, 'batch_size': 32, 'num_filters_1': 32, 'num_filters_2': 64, 'kernel_size': 5}
+    config = {'max_epoch': 200, 'learning_rate': 1e-3, 'batch_size': 32, 'num_filters_1': 32, 'num_filters_2': 64, 'kernel_size': 5, 'padding_size': 1}
 
     #------------------------------------------------------
 

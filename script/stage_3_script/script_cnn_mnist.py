@@ -2,6 +2,7 @@ from local_code.stage_3_code.Dataset_Loader import Dataset_Loader
 from local_code.stage_3_code.Method_CNN_MNIST import CNN_MNIST
 from local_code.stage_3_code.Result_Saver import Result_Saver
 from local_code.stage_3_code.Evaluate_Accuracy import Evaluate_Accuracy
+from local_code.stage_3_code.Training_Convergence_Plot import save_training_loss_curve
 import numpy as np
 import torch
 
@@ -39,6 +40,14 @@ if 1:
     method_obj.data = data
 
     result = method_obj.run()
+
+    plot_file_path = '../../result/stage_3_result/training_loss_curve_mnist.png'
+    save_training_loss_curve(
+        [method_obj.training_loss_history],
+        plot_file_path,
+        'MNIST Training Loss Convergence',
+        line_color='tab:blue'
+    )
 
     evaluate_obj.data = result
     metrics = evaluate_obj.evaluate()

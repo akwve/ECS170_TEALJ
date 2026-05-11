@@ -15,9 +15,9 @@ import numpy as np
 class CNN_CIFAR(method, nn.Module):
     data = None
     # it defines the max rounds to train the model
-    max_epoch = 100
+    max_epoch = 200
     # it defines the learning rate for gradient descent based optimizer for model learning
-    learning_rate = 3e-4
+    learning_rate = 1e-3
     batch_size = 64
 
     # Input: 3x32x32
@@ -63,6 +63,7 @@ class CNN_CIFAR(method, nn.Module):
 
         # Output layer:
         self.fc_layer_2 = nn.Linear(128, 10)
+        self.activation_4 = nn.Softmax(dim=1)
 
     # it defines the forward propagation function for input x
     # this function will calculate the output layer by layer
@@ -89,7 +90,7 @@ class CNN_CIFAR(method, nn.Module):
         x = self.dropout(x)
 
         # Output layer
-        y_pred = self.fc_layer_2(x)
+        y_pred = self.activation_4(self.fc_layer_2(x))
         return y_pred
 
     # backward error propagation will be implemented by pytorch automatically
@@ -97,8 +98,6 @@ class CNN_CIFAR(method, nn.Module):
 
     def train(self, X, y):
         self.training_loss_history = []
-
-        X = (X - X.mean()) / (X.std() + 1e-8)
 
         # check here for the torch.optim doc: https://pytorch.org/docs/stable/optim.html
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
@@ -147,13 +146,12 @@ class CNN_CIFAR(method, nn.Module):
 
     def test(self, X):
         with torch.no_grad():
-            X = (X - X.mean()) / (X.std() + 1e-8)
             # do the testing, and result the result
             y_pred = self.forward(torch.FloatTensor(X))
             # convert the probability distributions to the corresponding labels
             # instances will get the labels corresponding to the largest probability
             return y_pred.max(1)[1].cpu().numpy()
-    
+
     def run(self):
         print('method running...')
         print('--start training...')

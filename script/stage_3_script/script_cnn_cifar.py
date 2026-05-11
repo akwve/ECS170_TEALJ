@@ -11,7 +11,7 @@ if 1:
     #---- parameter section -------------------------------
     np.random.seed(2)
     torch.manual_seed(2)
-    config = {'max_epoch': 100, 'learning_rate': 1e-3, 'batch_size': 64, 'num_filters_1': 32, 'num_filters_2': 64, 'kernel_size': 3}
+    config = {'max_epoch': 200, 'learning_rate': 1e-3, 'batch_size': 64, 'num_filters_1': 32, 'num_filters_2': 64, 'kernel_size': 3}
 
     #------------------------------------------------------
 
@@ -41,11 +41,11 @@ if 1:
 
     result = method_obj.run()
 
-    plot_file_path = '../../result/stage_3_result/training_loss_curve_cifer.png'
+    plot_file_path = '../../result/stage_3_result/training_loss_curve_cifar.png'
     save_training_loss_curve(
         [method_obj.training_loss_history],
         plot_file_path,
-        'CIFER Training Loss Convergence',
+        'CIFAR Training Loss Convergence',
         line_color='tab:blue'
     )
 
@@ -67,6 +67,3 @@ if 1:
 
     print('************ Finish ************')
     # ------------------------------------------------------
-    
-
-    

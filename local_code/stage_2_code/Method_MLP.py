@@ -6,7 +6,7 @@ Concrete MethodModule class for a specific learning MethodModule
 # License: TBD
 
 from local_code.base_class.method import method
-from local_code.stage_2_code.Evaluate_Accuracy import Evaluate_Accuracy
+from local_code.stage_1_code.Evaluate_Accuracy import Evaluate_Accuracy
 import torch
 from torch import nn
 import numpy as np
@@ -25,28 +25,13 @@ class Method_MLP(method, nn.Module):
     def __init__(self, mName, mDescription):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
-
-        # store loss history for plotting
-        self.training_loss_history = []
-
         # check here for nn.Linear doc: https://pytorch.org/docs/stable/generated/torch.nn.Linear.html
-<<<<<<< HEAD
         self.fc_layer_1 = nn.Linear(784, 128)
         # check here for nn.ReLU doc: https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html
         self.activation_func_1 = nn.ReLU()
         self.fc_layer_2 = nn.Linear(128, 2)
-=======
-        self.fc_layer_1 = nn.Linear(784, 256)
-        # check here for nn.ReLU doc: https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html
-        self.activation_func_1 = nn.ReLU()
-        self.fc_layer_2 = nn.Linear(256, 128)
-        self.activation_func_2 = nn.ReLU()
-        self.fc_layer_3 = nn.Linear(128, 64)
-        self.activation_func_3 = nn.ReLU()
-        self.fc_layer_4 = nn.Linear(64, 10)
->>>>>>> 3a2c4d3a75bc06254e50e7157406749cfbec2287
         # check here for nn.Softmax doc: https://pytorch.org/docs/stable/generated/torch.nn.Softmax.html
-        self.activation_func_4 = nn.Softmax(dim=1)
+        self.activation_func_2 = nn.Softmax(dim=1)
 
     # it defines the forward propagation function for input x
     # this function will calculate the output layer by layer
@@ -54,28 +39,18 @@ class Method_MLP(method, nn.Module):
     def forward(self, x):
         '''Forward propagation'''
         # hidden layer embeddings
-        h = x
-        hidden_layers = [
-            (self.fc_layer_1, self.activation_func_1),
-            (self.fc_layer_2, self.activation_func_2),
-            (self.fc_layer_3, self.activation_func_3),
-        ]
-        for layer, activation in hidden_layers:
-            h = activation(layer(h))
-
+        h = self.activation_func_1(self.fc_layer_1(x))
         # outout layer result
         # self.fc_layer_2(h) will be a nx2 tensor
         # n (denotes the input instance number): 0th dimension; 2 (denotes the class number): 1st dimension
         # we do softmax along dim=1 to get the normalized classification probability distributions for each instance
-        y_pred = self.activation_func_2(self.fc_layer_4(h))
+        y_pred = self.activation_func_2(self.fc_layer_2(h))
         return y_pred
 
     # backward error propagation will be implemented by pytorch automatically
     # so we don't need to define the error backpropagation function here
 
     def train(self, X, y):
-        self.training_loss_history = []
-
         # check here for the torch.optim doc: https://pytorch.org/docs/stable/optim.html
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         # check here for the nn.CrossEntropyLoss doc: https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html
@@ -93,8 +68,6 @@ class Method_MLP(method, nn.Module):
             y_true = torch.LongTensor(np.array(y))
             # calculate the training loss
             train_loss = loss_function(y_pred, y_true)
-            # store train loss
-            self.training_loss_history.append(train_loss.item())
 
             # check here for the gradient init doc: https://pytorch.org/docs/stable/generated/torch.optim.Optimizer.zero_grad.html
             optimizer.zero_grad()
@@ -107,15 +80,7 @@ class Method_MLP(method, nn.Module):
 
             if epoch%100 == 0:
                 accuracy_evaluator.data = {'true_y': y_true, 'pred_y': y_pred.max(1)[1]}
-                training_metrics = accuracy_evaluator.evaluate()
-                print(
-                    'Epoch:', epoch,
-                    'Accuracy:', training_metrics['accuracy'],
-                    'Precision:', training_metrics['precision'],
-                    'Recall:', training_metrics['recall'],
-                    'F1:', training_metrics['f1'],
-                    'Loss:', train_loss.item()
-                )
+                print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item())
     
     def test(self, X):
         # do the testing, and result the result

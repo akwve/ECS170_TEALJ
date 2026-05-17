@@ -14,17 +14,8 @@ class Setting_Train_Test_Split(setting):
     
     def load_run_save_evaluate(self):
         
-<<<<<<< HEAD
-=======
         # load dataset
-        loaded_data = self.dataset.load()
 
-        X_train = loaded_data['train']['X']
-        y_train = loaded_data['train']['y']
-        X_test = loaded_data['test']['X']
-        y_test = loaded_data['test']['y']
-
->>>>>>> 3a2c4d3a75bc06254e50e7157406749cfbec2287
         # run MethodModule
         self.method.data = self.dataset.load()
         learned_result = self.method.run()

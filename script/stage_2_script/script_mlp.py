@@ -34,6 +34,7 @@ if 1:
     setting_obj.prepare(data_obj, method_obj, result_obj, evaluate_obj)
     setting_obj.print_setup_summary()
     mean_score, std_score = setting_obj.load_run_save_evaluate()
+    infodict = evaluate_obj.evaluate()
     print('************ Overall Performance ************')
     print('MLP Accuracy: ' + str(mean_score) + ' +/- ' + str(std_score))
     print('************ Finish ************')

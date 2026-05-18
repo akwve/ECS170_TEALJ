@@ -9,18 +9,16 @@ from local_code.base_class.result import result
 import pickle
 import os
 
-class Result_Saver(result):
+class Result_Loader(result):
     data = None
     fold_count = None
     result_destination_folder_path = None
     result_destination_file_name = None
     
-    def save(self):
-        print('saving results...')
-        os.makedirs(self.result_destination_folder_path, exist_ok=True)
-
+    def load(self):
+        print('loading results...')
         file_path = os.path.join(self.result_destination_folder_path,
                                  self.result_destination_file_name + '_' + str(self.fold_count))
-        f = open(file_path, 'wb')
-        pickle.dump(self.data, f)
+        f = open(file_path, 'rb')
+        self.data = pickle.load(f)
         f.close()

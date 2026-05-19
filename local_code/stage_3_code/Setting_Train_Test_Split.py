@@ -13,9 +13,6 @@ class Setting_Train_Test_Split(setting):
     fold = 3
     
     def load_run_save_evaluate(self):
-        
-        # load dataset
-
         # run MethodModule
         self.method.data = self.dataset.load()
         learned_result = self.method.run()

@@ -25,6 +25,8 @@ class Method_CNN_CIFAR(method, nn.Module):
     def __init__(self, mName, mDescription):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print("Using device:", self.device)
         self.conv1 = nn.Conv2d(3,32,kernel_size= 3, padding=1)
         self.bn1 = nn.BatchNorm2d(32)
         self.relu1 = nn.ReLU()
@@ -48,9 +50,10 @@ class Method_CNN_CIFAR(method, nn.Module):
         self.fc1 = nn.Linear(64*8*8,512)
         self.relu5 = nn.ReLU()
 
-        self.drop = nn.Dropout(0.5)
+        self.drop = nn.Dropout(0.3)
 
         self.fc2 = nn.Linear(512,10)
+        self.to(self.device)
 
     # it defines the forward propagation function for input x
     # this function will calculate the output layer by layer
@@ -64,7 +67,6 @@ class Method_CNN_CIFAR(method, nn.Module):
         h = self.pool2(h)
 
         h = h.view(h.size(0), -1)
-        # h = self.fcmini(h)
         h = self.fc1(h)
 
         h = self.relu5(h)
@@ -77,42 +79,44 @@ class Method_CNN_CIFAR(method, nn.Module):
     # so we don't need to define the error backpropagation function here
 
     def train(self, X, y):
-        # check here for the torch.optim doc: https://pytorch.org/docs/stable/optim.html
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        # check here for the nn.CrossEntropyLoss doc: https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html
         loss_function = nn.CrossEntropyLoss()
-        # for training accuracy investigation purpose
         accuracy_evaluator = Evaluate_Accuracy('training evaluator', '')
+        batch_size = 64
+        X = np.array(X)
+        y = np.array(y)
+        for epoch in range(self.max_epoch):
+            epoch_loss = 0
+            all_preds = []
+            all_true = []
+            perm = np.random.permutation(len(X))
+            X = X[perm]
+            y = y[perm]
+            for i in range(0, len(X), batch_size):
+                X_batch = torch.FloatTensor(X[i:i+batch_size]).to(self.device)
+                y_batch = torch.LongTensor(y[i:i+batch_size]).to(self.device)
+                y_pred = self.forward(X_batch)
+                train_loss = loss_function(y_pred, y_batch)
+                optimizer.zero_grad()
+                train_loss.backward()
+                optimizer.step()
+                epoch_loss += train_loss.item() * X_batch.size(0)
+                all_preds.append(y_pred.max(1)[1].detach().cpu())
+                all_true.append(y_batch.detach().cpu())
 
-        # it will be an iterative gradient updating process
-        # we don't do mini-batch, we use the whole input as one batch
-        # you can try to split X and y into smaller-sized batches by yourself
-        for epoch in range(self.max_epoch): # you can do an early stop if self.max_epoch is too much...
-            # get the output, we need to covert X into torch.tensor so pytorch algorithm can operate on it
-            y_pred = self.forward(torch.FloatTensor(np.array(X)))
-            # convert y to torch.tensor as well
-            y_true = torch.LongTensor(np.array(y))
-            # calculate the training loss
-            train_loss = loss_function(y_pred, y_true)
-
-            # check here for the gradient init doc: https://pytorch.org/docs/stable/generated/torch.optim.Optimizer.zero_grad.html
-            optimizer.zero_grad()
-            # check here for the loss.backward doc: https://pytorch.org/docs/stable/generated/torch.Tensor.backward.html
-            # do the error backpropagation to calculate the gradients
-            train_loss.backward()
-            # check here for the opti.step doc: https://pytorch.org/docs/stable/optim.html
-            # update the variables according to the optimizer and the gradients calculated by the above loss.backward function
-            optimizer.step()
-            accuracy_evaluator.data = {'true_y': y_true, 'pred_y': y_pred.max(1)[1]}
-            print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item())
+            accuracy_evaluator.data = {
+                'true_y': torch.cat(all_true),
+                'pred_y': torch.cat(all_preds)
+            }
+            epoch_loss = epoch_loss / len(X)
+            print('Epoch:', epoch,'Accuracy:', accuracy_evaluator.evaluate(),'Loss:', epoch_loss)
     
     def test(self, X):
-        # do the testing, and result the result
-        y_pred = self.forward(torch.FloatTensor(np.array(X)))
-        # convert the probability distributions to the corresponding labels
-        # instances will get the labels corresponding to the largest probability
-        return y_pred.max(1)[1]
-    
+        X_tensor = torch.FloatTensor(np.array(X)).to(self.device)
+        with torch.no_grad():
+            y_pred = self.forward(X_tensor)
+        return y_pred.max(1)[1].detach().cpu()
+        
     def run(self):
         print('method running...')
         print('--start training...')

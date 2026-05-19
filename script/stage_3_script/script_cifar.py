@@ -35,7 +35,7 @@ if 1:
     mean_score, std_score = setting_obj.load_run_save_evaluate()
     infodict = evaluate_obj.evaluate()
     print('************ Overall Performance ************')
-    print('CNN Accuracy for CIFAR: ' + str(mean_score) + ' +/- ' + str(std_score))
+    print('CNN Results for CIFAR: ' + str(mean_score) + ' +/- ' + str(std_score))
     print('************ Finish ************')
     # ------------------------------------------------------
     

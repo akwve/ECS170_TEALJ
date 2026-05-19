@@ -12,7 +12,7 @@ from torch import nn
 import numpy as np
 
 
-class Method_CNN_ORL(method, nn.Module):
+class Method_CNN_MNIST(method, nn.Module):
     data = None
     # it defines the max rounds to train the model
     max_epoch = 30
@@ -25,28 +25,31 @@ class Method_CNN_ORL(method, nn.Module):
     def __init__(self, mName, mDescription):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
-        self.conv1 = nn.Conv2d(1,16,kernel_size= 3, padding=1)
+        self.conv1 = nn.Conv2d(1,32,kernel_size= 3, padding=1)
+        self.bn1 = nn.BatchNorm2d(32)
         self.relu1 = nn.ReLU()
         self.pool1 = nn.MaxPool2d(2)
         
-        self.conv2 = nn.Conv2d(16,32,kernel_size= 3, padding=1)
+        self.conv2 = nn.Conv2d(32,64,kernel_size= 3, padding=1)
+        self.bn2 = nn.BatchNorm2d(64)
         self.relu2 = nn.ReLU()
         self.pool2 = nn.MaxPool2d(2)
 
-        self.fc1 = nn.Linear(32*28*23,128)
+        self.fc1 = nn.Linear(64*7*7,256)
         self.relu3 = nn.ReLU()
-        self.fc2 = nn.Linear(128,40)
-        # check here for nn.Softmax doc: https://pytorch.org/docs/stable/generated/torch.nn.Softmax.html
+        self.dropout = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(256,10)
 
     # it defines the forward propagation function for input x
     # this function will calculate the output layer by layer
 
     def forward(self, x):
         '''Forward propagation'''
-        h = self.pool1(self.relu1(self.conv1(x)))
-        h = self.pool2(self.relu2(self.conv2(h)))
+        h = self.pool1(self.relu1(self.bn1(self.conv1(x))))
+        h = self.pool2(self.relu2(self.bn2(self.conv2(h))))
         h = h.view(h.size(0),-1)
         h = self.relu3(self.fc1(h))
+        h = self.dropout(h)
         y_pred = self.fc2(h)
         return y_pred
 

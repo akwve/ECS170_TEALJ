@@ -1,5 +1,5 @@
 from local_code.stage_4_code.Dataset_Loader_Classifier import Dataset_Loader
-from local_code.stage_4_code.Method_Classifier import Method_RNN_bidirectional
+from local_code.stage_4_code.Method_Classifier import Method_RNN_LSTM
 from local_code.stage_4_code.Result_Saver import Result_Saver
 from local_code.stage_4_code.Setting_Train_Test_Split import Setting_Train_Test_Split
 from local_code.stage_4_code.Evaluate_Accuracy import Evaluate_Accuracy
@@ -17,7 +17,7 @@ if 1:
     data_obj = Dataset_Loader('Classifier', '')
     data_obj.dataset_source_folder_path = 'data/stage_4_data/text_classification'
 
-    method_obj = Method_RNN_bidirectional('Bidirectional LSTM ', '')
+    method_obj = Method_RNN_LSTM('Bidirectional LSTM ', '')
 
     result_obj = Result_Saver('saver', '')
     result_obj.result_destination_folder_path = 'result/stage_3_result/ORL'

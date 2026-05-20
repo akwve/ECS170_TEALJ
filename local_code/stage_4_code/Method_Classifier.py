@@ -12,7 +12,7 @@ from torch import nn
 import numpy as np
 
 
-class Method_RNN_bidirectional(method, nn.Module):
+class Method_RNN_LSTM(method, nn.Module):
     data = None
     # it defines the max rounds to train the model
     max_epoch = 11
@@ -127,7 +127,7 @@ class Method_RNN(method, nn.Module):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print("Using device:", self.device)
         self.embedding = nn.Embedding(20000, 128, padding_idx= 0)
-        self.fc = nn.Linear(128, 64)
+        self.fc1 = nn.Linear(128, 64)
         self.relu = nn.ReLU()
         self.drop = nn.Dropout(0.3)
         self.fc2 = nn.Linear(64,2)
@@ -137,9 +137,12 @@ class Method_RNN(method, nn.Module):
     # this function will calculate the output layer by layer
     def forward(self, x):
         h = self.embedding(x)
-        output, (hidden, cell) = self.lstm(h)
-        h = hidden[-1]
-        return self.fc(h)
+        h = h.mean(dim=1)
+        h = self.fc1(h)
+        h = self.relu(h)
+        h = self.drop(h)
+
+        return self.fc2(h)
 
     # backward error propagation will be implemented by pytorch automatically
     # so we don't need to define the error backpropagation function here

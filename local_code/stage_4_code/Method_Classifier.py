@@ -15,7 +15,7 @@ import numpy as np
 class Method_RNN_bidirectional(method, nn.Module):
     data = None
     # it defines the max rounds to train the model
-    max_epoch = 17
+    max_epoch = 12
     # it defines the learning rate for gradient descent based optimizer for model learning
     learning_rate = 1e-3
 
@@ -33,10 +33,10 @@ class Method_RNN_bidirectional(method, nn.Module):
         self.lstm = nn.LSTM(input_size=128, hidden_size=128,batch_first=True,bidirectional=True)
 
         self.norm = nn.LayerNorm(256)
-        self.fc1 = nn.Linear(256, 128)
+        self.fc1 = nn.Linear(256, 64)
         self.relu = nn.ReLU()
         self.drop = nn.Dropout(0.3)
-        self.fc2 = nn.Linear(128, 2)
+        self.fc2 = nn.Linear(64, 2)
 
         self.to(self.device)
 
@@ -45,7 +45,7 @@ class Method_RNN_bidirectional(method, nn.Module):
     def forward(self, x):
         h = self.embedding(x)
         output, (hidden, cell) = self.lstm(h)
-        h = torch.cat((hidden[-2], hidden[-1]), dim=1)
+        h = output.mean(dim=1)
         h = self.norm(h)
         h = self.fc1(h)
         h = self.relu(h)
@@ -61,7 +61,7 @@ class Method_RNN_bidirectional(method, nn.Module):
         loss_function = nn.CrossEntropyLoss()
         accuracy_evaluator = Evaluate_Accuracy('training evaluator', '')
         # full batch is too much ram, so it is limited to batches of 64 so it's doable by the GPU
-        batch_size = 128
+        batch_size = 64
         X = np.array(X)
         y = np.array(y)
         for epoch in range(self.max_epoch):
@@ -126,9 +126,11 @@ class Method_RNN(method, nn.Module):
         nn.Module.__init__(self)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print("Using device:", self.device)
-        self.embedding = nn.Embedding(20000, 128)
-        self.lstm = nn.LSTM(input_size=128, hidden_size=128,batch_first=True,bidirectional=False)
-        self.fc = nn.Linear(128, 2)
+        self.embedding = nn.Embedding(20000, 128, padding_idx= 0)
+        self.fc = nn.Linear(128, 64)
+        self.relu = nn.ReLU()
+        self.drop = nn.Dropout(0.3)
+        self.fc2 = nn.Linear(64,2)
         self.to(self.device)
 
     # it defines the forward propagation function for input x

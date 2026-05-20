@@ -37,6 +37,6 @@ if 1:
     print('Simple RNN Results for Classification: ' + str(mean_score) + ' +/- ' + str(std_score))
     print('************ Finish ************')
     # ------------------------------------------------------
-    # {'accuracy': 0.50368, 'precision': 0.5127807042750412, 'recall': 0.50368, 'f1': 0.3961922693238795}
+    # {'accuracy': 0.50504, 'precision': 0.5200343935203657, 'recall': 0.50504, 'f1': 0.39111211141802393}
 
     

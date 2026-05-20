@@ -10,6 +10,7 @@ from local_code.stage_3_code.Evaluate_Accuracy import Evaluate_Accuracy
 import torch
 from torch import nn
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Method_RNN_LSTM(method, nn.Module):
@@ -18,7 +19,6 @@ class Method_RNN_LSTM(method, nn.Module):
     max_epoch = 11
     # it defines the learning rate for gradient descent based optimizer for model learning
     learning_rate = 1e-3
-    loss_history=[]
 
     # it defines the the MLP model architecture, e.g.,
     # how many layers, size of variables in each layer, activation function, etc.
@@ -65,6 +65,7 @@ class Method_RNN_LSTM(method, nn.Module):
         batch_size = 64
         X = np.array(X)
         y = np.array(y)
+        L = []
         for epoch in range(self.max_epoch):
             epoch_loss = 0
             all_preds = []
@@ -89,8 +90,10 @@ class Method_RNN_LSTM(method, nn.Module):
                 'pred_y': torch.cat(all_preds)
             }
             epoch_loss = epoch_loss / len(X)
+            L.append(epoch_loss)
             print('Epoch:', epoch,'Accuracy:', accuracy_evaluator.evaluate(),'Loss:', epoch_loss)
-    
+        return L
+
     def test(self, X):
         self.eval()
         batch_size = 64
@@ -106,7 +109,15 @@ class Method_RNN_LSTM(method, nn.Module):
     def run(self):
         print('method running...')
         print('--start training...')
-        self.train_model(self.data['train']['X'], self.data['train']['y'])
+        loss_per_epoch = self.train_model(self.data['train']['X'], self.data['train']['y'])
+        epochs = np.arange(len(loss_per_epoch))
+        plt.plot(epochs, loss_per_epoch)
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.title("LSTM Training Loss Curve")
+        plt.grid(True)
+        plt.savefig("result/stage_4_result/LSTM_loss_curve.png", dpi=300, bbox_inches="tight")
+        plt.close()
         print('--start testing...')
         pred_y = self.test(self.data['test']['X'])
         return {'pred_y': pred_y, 'true_y': self.data['test']['y']}
@@ -163,6 +174,7 @@ class Method_RNN_GRU(method, nn.Module):
         batch_size = 64
         X = np.array(X)
         y = np.array(y)
+        L = []
         for epoch in range(self.max_epoch):
             epoch_loss = 0
             all_preds = []
@@ -187,7 +199,9 @@ class Method_RNN_GRU(method, nn.Module):
                 'pred_y': torch.cat(all_preds)
             }
             epoch_loss = epoch_loss / len(X)
+            L.append(epoch_loss)
             print('Epoch:', epoch,'Accuracy:', accuracy_evaluator.evaluate(),'Loss:', epoch_loss)
+        return L
     
     def test(self, X):
         self.eval()
@@ -204,7 +218,15 @@ class Method_RNN_GRU(method, nn.Module):
     def run(self):
         print('method running...')
         print('--start training...')
-        self.train_model(self.data['train']['X'], self.data['train']['y'])
+        loss_per_epoch=self.train_model(self.data['train']['X'], self.data['train']['y'])
+        epochs = np.arange(len(loss_per_epoch))
+        plt.plot(epochs, loss_per_epoch)
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.title("GRU Training Loss Curve")
+        plt.grid(True)
+        plt.savefig("result/stage_4_result/GRU_loss_curve.png", dpi=300, bbox_inches="tight")
+        plt.close()
         print('--start testing...')
         pred_y = self.test(self.data['test']['X'])
         return {'pred_y': pred_y, 'true_y': self.data['test']['y']}
@@ -212,7 +234,7 @@ class Method_RNN_GRU(method, nn.Module):
 class Method_RNN(method, nn.Module):
     data = None
     # it defines the max rounds to train the model
-    max_epoch = 20
+    max_epoch = 13
     # it defines the learning rate for gradient descent based optimizer for model learning
     learning_rate = 1e-3
 
@@ -254,6 +276,7 @@ class Method_RNN(method, nn.Module):
         batch_size = 64
         X = np.array(X)
         y = np.array(y)
+        L = []
         for epoch in range(self.max_epoch):
             epoch_loss = 0
             all_preds = []
@@ -278,7 +301,9 @@ class Method_RNN(method, nn.Module):
                 'pred_y': torch.cat(all_preds)
             }
             epoch_loss = epoch_loss / len(X)
+            L.append(epoch_loss)
             print('Epoch:', epoch,'Accuracy:', accuracy_evaluator.evaluate(),'Loss:', epoch_loss)
+        return L
     
     def test(self, X):
         self.eval()
@@ -295,7 +320,15 @@ class Method_RNN(method, nn.Module):
     def run(self):
         print('method running...')
         print('--start training...')
-        self.train_model(self.data['train']['X'], self.data['train']['y'])
+        loss_per_epoch=self.train_model(self.data['train']['X'], self.data['train']['y'])
+        epochs = np.arange(len(loss_per_epoch))
+        plt.plot(epochs, loss_per_epoch)
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.title("Simple RNN Training Loss Curve")
+        plt.grid(True)
+        plt.savefig("result/stage_4_result/RNN_loss_curve.png", dpi=300, bbox_inches="tight")
+        plt.close()
         print('--start testing...')
         pred_y = self.test(self.data['test']['X'])
         return {'pred_y': pred_y, 'true_y': self.data['test']['y']}

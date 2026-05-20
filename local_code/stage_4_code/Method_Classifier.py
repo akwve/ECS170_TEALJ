@@ -15,7 +15,7 @@ import numpy as np
 class Method_RNN_bidirectional(method, nn.Module):
     data = None
     # it defines the max rounds to train the model
-    max_epoch = 12
+    max_epoch = 11
     # it defines the learning rate for gradient descent based optimizer for model learning
     learning_rate = 1e-3
 

@@ -20,7 +20,7 @@ if 1:
     method_obj = Method_RNN('Simple RNN ', '')
 
     result_obj = Result_Saver('saver', '')
-    result_obj.result_destination_folder_path = 'result/stage_3_result/ORL'
+    result_obj.result_destination_folder_path = 'result/stage_4_result/RNN'
     result_obj.result_destination_file_name = 'prediction_result'
 
     setting_obj = Setting_Train_Test_Split('Simple RNN', '')
@@ -37,6 +37,6 @@ if 1:
     print('Simple RNN Results for Classification: ' + str(mean_score) + ' +/- ' + str(std_score))
     print('************ Finish ************')
     # ------------------------------------------------------
-    
+    # {'accuracy': 0.50368, 'precision': 0.5127807042750412, 'recall': 0.50368, 'f1': 0.3961922693238795}
 
     

@@ -5,7 +5,7 @@ from local_code.stage_4_code.Evaluate_Accuracy import Evaluate_Accuracy
 from local_code.stage_4_code.Setting_Train_Test_Split import Setting_Generator
 import numpy as np
 import torch
-
+import time
 #---- Multi-Layer Perceptron script ----
 if 1:
     #---- parameter section -------------------------------
@@ -32,10 +32,13 @@ if 1:
 
     # ---- running section ---------------------------------
     print('************ Start ************')
+    start = time.time()
     setting_obj.prepare(data_obj, method_obj, result_obj, evaluate_obj)
     setting_obj.print_setup_summary()
     setting_obj.load_run_save_evaluate()
     print('************ Finish ************')
+    end = time.time()
+    print(f"Time Elapsed : {(end-start):.2f} seconds")
     # ------------------------------------------------------
     # {'accuracy': 0.50504, 'precision': 0.5200343935203657, 'recall': 0.50504, 'f1': 0.39111211141802393}
 

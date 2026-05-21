@@ -5,6 +5,7 @@ from local_code.stage_4_code.Setting_Train_Test_Split import Setting_Train_Test_
 from local_code.stage_4_code.Evaluate_Accuracy import Evaluate_Accuracy
 import numpy as np
 import torch
+import time
 
 #---- Multi-Layer Perceptron script ----
 if 1:
@@ -29,13 +30,16 @@ if 1:
 
     # ---- running section ---------------------------------
     print('************ Start ************')
+    start = time.time()
     setting_obj.prepare(data_obj, method_obj, result_obj, evaluate_obj)
     setting_obj.print_setup_summary()
     mean_score, std_score = setting_obj.load_run_save_evaluate()
     infodict = evaluate_obj.evaluate()
     print('************ Overall Performance ************')
     print('Simple RNN Results for Classification: ' + str(mean_score) + ' +/- ' + str(std_score))
+    end = time.time()
     print('************ Finish ************')
+    print(f"Time Elapsed : {(end-start):.2f} seconds")
     # ------------------------------------------------------
     # {'accuracy': 0.50504, 'precision': 0.5200343935203657, 'recall': 0.50504, 'f1': 0.39111211141802393}
 

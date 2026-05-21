@@ -25,4 +25,22 @@ class Setting_Train_Test_Split(setting):
         
         return self.evaluate.evaluate(), None
 
-        
+
+class Setting_Generator(setting):
+    fold = 3
+
+    def load_run_save_evaluate(self):
+
+        self.method.data = self.dataset.load()
+
+        learned_result = self.method.run()
+
+        self.result.data = learned_result
+        self.result.save()
+
+        print('\nGenerated Jokes:\n')
+
+        for i, joke in enumerate(learned_result['generated_text']):
+            print(f'{i+1}. {joke}\n')
+
+        return learned_result, None

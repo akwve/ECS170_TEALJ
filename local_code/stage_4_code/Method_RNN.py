@@ -12,7 +12,7 @@ import time
 class Method_RNN(method, nn.Module):
     data = None
     # it defines the max rounds to train the model
-    max_epoch = 5
+    max_epoch = 30
     # it defines the learning rate for gradient descent based optimizer for model learning
     learning_rate = 1e-3
     batch_size = 64
@@ -132,14 +132,26 @@ class Method_RNN(method, nn.Module):
             scheduler.step()
 
     def test(self, X):
-        """Test the RNN model"""
+        """Test the RNN model with batching to avoid memory issues"""
         with torch.no_grad():
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-            X_tensor = self._prepare_input(X).to(device)
-            y_pred = self.forward(X_tensor)
-            # convert the probability distributions to the corresponding labels
-            # instances will get the labels corresponding to the largest probability
-            return y_pred.max(1)[1].cpu().numpy()
+
+            all_predictions = []
+            num_samples = len(X)
+
+            # Process in batches to avoid memory overflow
+            for i in range(0, num_samples, self.batch_size):
+                batch_end = min(i + self.batch_size, num_samples)
+                X_batch = self._prepare_input(X[i:batch_end])
+                X_batch = X_batch.to(device)
+
+                # Forward pass
+                y_pred = self.forward(X_batch)
+                # Get predictions
+                batch_predictions = y_pred.max(1)[1].cpu().numpy()
+                all_predictions.extend(batch_predictions)
+
+            return np.array(all_predictions)
 
     def run(self):
         """Execute the RNN training and testing pipeline"""

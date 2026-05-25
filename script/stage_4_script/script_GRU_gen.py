@@ -14,19 +14,20 @@ if 1:
     #------------------------------------------------------
 
     # ---- objection initialization setction ---------------
-    data_obj = Dataset_Loader('Generator', '')
+    data_obj = Dataset_Loader('GRU Based Generator', '')
     data_obj.dataset_source_folder_path = 'data/stage_4_data/text_generation/'
     data_obj.dataset_source_file_name = 'data'
     dataset = data_obj.load()
+    starters = ["why did the","a guy walks","what do you call","did you hear about","why did the chicken cross", "a priest walks into a"]
     vs = dataset['vocab']['vocab_size'] 
-    method_obj = Method_RNN_Generator('Generator', '',vocab_size=vs)
+    method_obj = Method_RNN_Generator('GRU Based Generator', '', starters, vs, arch='GRU')
     method_obj.data=dataset
 
     result_obj = Result_Saver('saver', '')
-    result_obj.result_destination_folder_path = 'result/stage_4_result/text_generation'
+    result_obj.result_destination_folder_path = 'result/stage_4_result/LSTM_text_generation'
     result_obj.result_destination_file_name = 'Jokes'
 
-    setting_obj = Setting_Generator('Generator', '')
+    setting_obj = Setting_Generator('GRU Based Generator', '')
     evaluate_obj = Evaluate_Accuracy('None', '')
     # ------------------------------------------------------
 

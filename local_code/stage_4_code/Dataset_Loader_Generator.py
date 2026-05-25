@@ -18,9 +18,11 @@ class Dataset_Loader(dataset):
     def __init__(self, dName=None, dDescription=None):
         super().__init__(dName, dDescription)
 
-    @staticmethod
-    def clean_text(text):
+    def clean_text(self,text):
         text = text.lower()
+        text = re.sub(r'http\S+|www\.\S+', '', text)
+        text = re.sub(r'/r/\w+/\S*', '', text)
+        text = re.sub(r'\b\w+\.(com|org|net|io|edu)\b', '', text)
         text = text.replace('"', '')
         text = re.sub(r'([?.!,])', r' \1 ', text)
         text = re.sub(r'\s+', ' ', text).strip()

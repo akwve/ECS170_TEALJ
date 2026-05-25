@@ -13,21 +13,29 @@ import matplotlib.pyplot as plt
 
 class Method_RNN_Generator(method, nn.Module):
     data = None
-    max_epoch = 60
+    max_epoch = 300
     learning_rate = 3e-4
 
-    def __init__(self, mName, mDescription, vocab_size, embed_dim=256, hidden_dim=512):
+    def __init__(self, mName, mDescription, starters,vocab_size, embed_dim=256, hidden_dim=512, arch='RNN'):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
-
+        self.start = starters
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+        self.arch = arch
         self.vocab_size = vocab_size
         self.embed_dim = embed_dim
         self.hidden_dim = hidden_dim
         self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=0)
         self.embed_drop = nn.Dropout(0.2)
-        self.lstm = nn.LSTM(input_size=embed_dim,hidden_size=hidden_dim,dropout=0.3,num_layers=2,batch_first=True)
+        match arch:
+            case 'RNN':
+                self.rnn = nn.RNN(input_size=embed_dim,hidden_size=hidden_dim,dropout=0.3,num_layers=2,batch_first=True)
+
+            case 'GRU':
+                self.rnn = nn.GRU(input_size=embed_dim,hidden_size=hidden_dim,dropout=0.3,num_layers=2,batch_first=True)
+
+            case _:
+                self.rnn = nn.LSTM(input_size=embed_dim,hidden_size=hidden_dim,dropout=0.3,num_layers=2,batch_first=True)
         self.norm = nn.LayerNorm(hidden_dim)
         self.drop = nn.Dropout(0.3)
         self.fc = nn.Linear(hidden_dim, vocab_size)
@@ -36,7 +44,7 @@ class Method_RNN_Generator(method, nn.Module):
     def forward(self, x, hidden=None):
         x = self.embedding(x)
         x = self.embed_drop(x)
-        out, hidden = self.lstm(x, hidden)
+        out, hidden = self.rnn(x, hidden)
         out = self.norm(out)
         out = self.drop(out)
         logits = self.fc(out)
@@ -49,6 +57,9 @@ class Method_RNN_Generator(method, nn.Module):
         X = np.array(X)
         y = np.array(y)
         batch_size = 64
+        last_loss = float('inf')
+        patience = 5
+        counter = 0
         for epoch in range(self.max_epoch):
             epoch_loss = 0
             perm = np.random.permutation(len(X))
@@ -59,7 +70,7 @@ class Method_RNN_Generator(method, nn.Module):
                 y_batch = torch.LongTensor(y[i:i+batch_size]).to(self.device)
                 logits, _ = self.forward(X_batch)
                 loss = loss_function(
-                    logits[:, -1, :],   # ONLY last token prediction (IMPORTANT FIX)
+                    logits[:, -1, :],
                     y_batch
                 )
                 optimizer.zero_grad()
@@ -68,8 +79,18 @@ class Method_RNN_Generator(method, nn.Module):
                 optimizer.step()
                 epoch_loss += loss.item()
             avg_loss = epoch_loss / (len(X) / batch_size)
+
+            if avg_loss < last_loss - 1e-3:
+                last_loss = avg_loss
+                counter = 0
+            else:
+                counter+=1
             print(f"Epoch {epoch+1}/{self.max_epoch} | Loss: {avg_loss:.4f}")
             loss_record.append(avg_loss)
+            if counter >= patience:
+                print(f"Early stopping at epoch {epoch+1}")
+                break
+
         return loss_record
 
     def generate(self, word_to_idx, idx_to_word, start_words, max_len=20):
@@ -79,7 +100,7 @@ class Method_RNN_Generator(method, nn.Module):
         input_seq = torch.LongTensor(idxs).unsqueeze(0).to(self.device)
         hidden = None
         for _ in range(max_len):
-            logits, hidden = self.forward(input_seq)
+            logits, hidden = self.forward(input_seq, hidden)
             temperature = 0.65
             top_k = 5
             step_logits = logits[0, -1] / temperature
@@ -98,9 +119,7 @@ class Method_RNN_Generator(method, nn.Module):
             if next_word == "<END>":
                 break
             words.append(next_word)
-            input_seq = torch.LongTensor(
-                [word_to_idx.get(w, word_to_idx["<UNK>"]) for w in words[-3:]]
-            ).unsqueeze(0).to(self.device)
+            input_seq = torch.LongTensor([word_to_idx.get(w, word_to_idx["<UNK>"]) for w in words[-len(start_words.split()):]]).unsqueeze(0).to(self.device)
         return " ".join(words)
 
     def run(self):
@@ -109,21 +128,16 @@ class Method_RNN_Generator(method, nn.Module):
         plt.plot(epochs, loss_per_epoch)
         plt.xlabel("Epoch")
         plt.ylabel("Loss")
-        plt.title("LSTM Training Loss Curve")
+        plt.title(f"{self.arch} Generator Training Loss Curve")
         plt.grid(True)
-        plt.savefig("result/stage_4_result/LSTM_generator_loss_curve.png", dpi=300, bbox_inches="tight")
+        plt.savefig(f"result/stage_4_result/{self.arch}_generator_loss_curve.png", dpi=300, bbox_inches="tight")
         plt.close()
         print('--start testing...')
         samples = [
             self.generate(
                 self.data['vocab']['word_to_idx'],
                 self.data['vocab']['idx_to_word'],
-                "what did the"
-            ),
-            self.generate(
-                self.data['vocab']['word_to_idx'],
-                self.data['vocab']['idx_to_word'],
-                "why don't the"
-            )
+                i
+            ) for i in self.start
         ]
         return {'generated_text': samples}

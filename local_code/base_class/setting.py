@@ -26,7 +26,7 @@ class setting:
         self.setting_name = sName
         self.setting_description = sDescription
     
-    def prepare(self, sDataset, sMethod, sResult, sEvaluate):
+    def prepare(self, sDataset, sMethod, sResult, sEvaluate = "None"):
         self.dataset = sDataset
         self.method = sMethod
         self.result = sResult

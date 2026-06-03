@@ -6,7 +6,6 @@ Concrete IO class for a specific dataset
 # License: TBD
 
 from local_code.base_class.dataset import dataset
-import os
 
 class Dataset_Loader(dataset):
     data = None

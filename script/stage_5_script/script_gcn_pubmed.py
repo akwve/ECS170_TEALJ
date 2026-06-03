@@ -20,11 +20,14 @@ if __name__ == '__main__':
     torch.manual_seed(2)
 
     config = {
-        'max_epoch': 200,
-        'learning_rate': 1e-2,
-        'weight_decay': 5e-4,
-        'hidden_dim': 16,
+        'max_epoch': 300,
+        'learning_rate': 4e-2,
+        'weight_decay': 1e-4,
+        'hidden_dim': 2,
         'dropout': 0.5,
+        'optimizer': 'adam',
+        'betas': (0.9, 0.999),
+        'eps': 1e-6,
     }
 
     print('Loading dataset...')

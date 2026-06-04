@@ -8,7 +8,7 @@ class Method_GCN(method, nn.Module):
 
     data = None
     max_epoch = 200
-    learning_rate = 0.01
+    learning_rate = 0.005
     patience = 10
 
     def __init__(self, mName, mDescription):
@@ -49,16 +49,13 @@ class Method_GCN(method, nn.Module):
         y = graph['y'].to(self.device)
         A = graph['utility']['A'].to(self.device)
         A = self.normalize_adj(A)
-
         idx_train = split['idx_train']
         idx_val = split['idx_val']
         idx_test = split['idx_test']
-
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate,weight_decay=5e-4)
         num_classes = int(y.max()) + 1
         counts = torch.bincount(y[idx_train],minlength=num_classes).float()
         weights = counts.sum() / counts
-
         loss_fn = nn.CrossEntropyLoss(weight=weights.to(self.device))
         best_val = 0
         patience_counter = 0
@@ -105,17 +102,26 @@ class Method_GCN_Cora(Method_GCN):
     def __init__(self, mName, mDescription):
         super().__init__(mName, mDescription)
 
-        self.gc1 = nn.Linear(1433, 16, bias=False)
-        self.gc2 = nn.Linear(16, 7, bias=False)
+        self.gc1 = nn.Linear(1433, 32, bias=False)
+        self.gc2 = nn.Linear(32, 7, bias=False)
         self.to(self.device)
 
 class Method_GCN_Citeseer(Method_GCN):
     def __init__(self, mName, mDescription):
         super().__init__(mName, mDescription)
 
-        self.gc1 = nn.Linear(3703, 64, bias=False)
-        self.gc2 = nn.Linear(64, 6, bias=False)
+        self.gc1 = nn.Linear(3703, 512, bias=False)
+        self.gc2 = nn.Linear(512, 6, bias=False)
+        self.dropout = nn.Dropout(0.6)
         self.to(self.device)
+    def forward(self, X, A):
+        h = self.gc1(X)
+        h = torch.spmm(A, h)
+        h = torch.relu(h)
+        h = self.dropout(h)
+        h = self.gc2(h)
+        h = torch.spmm(A, h)
+        return h
 class Method_GCN_Pubmed(Method_GCN):
     def __init__(self, mName, mDescription):
         super().__init__(mName, mDescription)
@@ -123,3 +129,5 @@ class Method_GCN_Pubmed(Method_GCN):
         self.gc1 = nn.Linear(500, 64, bias=False)
         self.gc2 = nn.Linear(64, 3, bias=False)
         self.to(self.device)
+
+## 51 Epochs {'accuracy': 0.797, 'precision': 0.7683691562376166, 'recall': 0.7892788099715463, 'f1': 0.7764021173989804}

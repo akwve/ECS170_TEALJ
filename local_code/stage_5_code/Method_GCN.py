@@ -45,6 +45,7 @@ class Method_GCN(method, nn.Module):
         graph = self.data['graph']
         split = self.data['train_test_val']
         X = graph['X'].to(self.device)
+        X = F.normalize(X, p=2, dim=1)
         y = graph['y'].to(self.device)
         A = graph['utility']['A'].to(self.device)
         A = self.normalize_adj(A)
@@ -54,8 +55,11 @@ class Method_GCN(method, nn.Module):
         idx_test = split['idx_test']
 
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        loss_fn = nn.CrossEntropyLoss()
+        num_classes = int(y.max()) + 1
+        counts = torch.bincount(y[idx_train],minlength=num_classes).float()
+        weights = counts.sum() / counts
 
+        loss_fn = nn.CrossEntropyLoss(weight=weights.to(self.device))
         best_val = 0
         patience_counter = 0
         best_state = None
@@ -64,7 +68,7 @@ class Method_GCN(method, nn.Module):
         for epoch in range(self.max_epoch):
             self.train()
             logits = self.forward(X, A)
-            loss = loss_fn(F.log_softmax(logits[idx_train], dim=1), y[idx_train])
+            loss = loss_fn(logits[idx_train], y[idx_train])
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

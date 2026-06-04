@@ -9,7 +9,7 @@ class Method_GCN(method, nn.Module):
     data = None
     max_epoch = 200
     learning_rate = 0.005
-    patience = 10
+    patience = 20
 
     def __init__(self, mName, mDescription):
         method.__init__(self, mName, mDescription)
@@ -60,6 +60,7 @@ class Method_GCN(method, nn.Module):
         best_val = 0
         patience_counter = 0
         best_state = None
+        best_epoch = 0
         loss_curve = []
 
         for epoch in range(self.max_epoch):
@@ -80,11 +81,12 @@ class Method_GCN(method, nn.Module):
                 best_val = val_acc
                 patience_counter = 0
                 best_state = self.state_dict()
+                best_epoch = epoch
             else:
                 patience_counter += 1
 
             if patience_counter >= self.patience:
-                print("Early stopping triggered.")
+                print(f"Early stopping triggered, best is at {best_epoch} with an accuracy of {best_val}.")
                 break
         if best_state is not None:
             self.load_state_dict(best_state)
@@ -130,4 +132,5 @@ class Method_GCN_Pubmed(Method_GCN):
         self.gc2 = nn.Linear(64, 3, bias=False)
         self.to(self.device)
 
-## 51 Epochs {'accuracy': 0.797, 'precision': 0.7683691562376166, 'recall': 0.7892788099715463, 'f1': 0.7764021173989804}
+## Cora 85 Epochs {'accuracy': 0.807, 'precision': 0.7843099115954806, 'recall': 0.7998716997590403, 'f1': 0.7863380084620825}
+## Citeseer 70 epochs {'accuracy': 0.713, 'precision': 0.6651303536138705, 'recall': 0.5565674626217311, 'f1': 0.5663925131371986}
